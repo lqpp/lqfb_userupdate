@@ -118,15 +118,19 @@ for user in db_users :
 	while csv_index < len(csv_users) and user[0] != csv_users[csv_index][0] :
 		csv_index += 1 
 
-	if user[0] == csv_users[csv_index][0] :
+	if csv_index < len(csv_users) and user[0] == csv_users[csv_index][0] :
 		# we found the user
-		update_user(user, csv_users[csv_index])
+		update_user(user, csv_users[csv_index])		
+		csv_users.pop(csv_index)
 
 	else :
 		# user is not in the csv so lock him
 		csv_index = csv_start
 		lock_user(user)
 
+# create users
+for user in csv_users :
+	create_user(user)
 
 #logger.info(csv_users)
 #logger.info(db_users)
