@@ -6,6 +6,7 @@ import csv
 import datetime
 import logging
 
+
 # create logger
 logger = logging.getLogger('userupdate')
 logger.setLevel(logging.DEBUG)
@@ -23,37 +24,43 @@ ch.setFormatter(formatter)
 # add ch to logger
 logger.addHandler(ch)
 
-logger.info("Logger initialised")
-
-# Old school logfile (deprecated)
-logfile = "userupdate_log_" + datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + '.log'
-
 # parses csv file and returns array with data
 def parse_file(filename):
 
 	file = open(filename, 'rt')
 
 	reader = None
-	csv_users = []
+	users = []
 
 	try:
 		reader = csv.reader(file)
 
 		for row in reader:
 
-			user = row
+			# invite, id and identification
+			user = [row[0], row[1], row[2]]
 
+			# get all units, try to split all fields
+			units = []
 
-			users.append(row)
+			for i in range(3, len(row)) :
+				unit = row[i].split(',')
+
+				for u in unit :
+					units.append(u)			
+
+			user.append(units)
+			users.append(user)
 		
 	except:
+		logger.error("Error parsing csv")
 		sys.exit(1)
 
 	finally:
 		file.close()
 
 	#sort users by invite_code
-	return sorted(csv_users)
+	return sorted(users)
 
 # reads all user_ids and invite keys from lqfb database
 def read_db(dbname):
@@ -79,32 +86,18 @@ def read_db(dbname):
 
 	return users
 
-def logger(text) :
-	
-	#log=open(logfile, 'a')
-
-	time=datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-
-	#log.write(time + ": " + text)
-
-	print text
-
-	#log.close()
 	
 def lock_user (user) :
 
-	logger("Locked user: " + user[0])
-
+	logger.info("Locked user: " + user[0])
 
 def create_user (user) :
 
-	logger("Created user: " + user[0])
+	logger.info("Created user: " + user[0])
 
 def update_user (db_user, csv_user) :
 
-	logger("Updated user: " + db_user[0])
-
-
+	logger.info("Updated user: " + db_user[0])
 
 # main program
 csv_users = parse_file("test.csv")
@@ -122,14 +115,12 @@ for user in db_users :
 	csv_start = csv_index
 
 	# find user in csv
-	while user[0] != csv_users[csv_index][0] :
+	while csv_index < len(csv_users) and user[0] != csv_users[csv_index][0] :
 		csv_index += 1 
-
 
 	if user[0] == csv_users[csv_index][0] :
 		# we found the user
 		update_user(user, csv_users[csv_index])
-		csv_users.remove()
 
 	else :
 		# user is not in the csv so lock him
@@ -137,11 +128,5 @@ for user in db_users :
 		lock_user(user)
 
 
-
-
-
-
-
-
-#print csv_users
-#print db_users
+#logger.info(csv_users)
+#logger.info(db_users)
