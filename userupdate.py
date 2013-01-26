@@ -13,12 +13,16 @@ def parse_file(filename):
 	file = open(filename, 'rt')
 
 	reader = None
-	users = []
+	csv_users = []
 
 	try:
 		reader = csv.reader(file)
 
 		for row in reader:
+
+			user = row
+
+
 			users.append(row)
 		
 	except:
@@ -28,8 +32,7 @@ def parse_file(filename):
 		file.close()
 
 	#sort users by invite_code
-
-	return sorted(users)
+	return sorted(csv_users)
 
 # reads all user_ids and invite keys from lqfb database
 def read_db(dbname):
