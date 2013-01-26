@@ -6,6 +6,9 @@ import csv
 import datetime
 import logging
 
+#######################################################################################
+## Config
+dbname="lqfb_ap"
 
 # create logger
 logger = logging.getLogger('userupdate')
@@ -75,7 +78,7 @@ def parse_file(filename):
 	return sorted(users)
 
 # reads all user_ids and invite keys from lqfb database
-def read_db(dbname):
+def read_db():
 
 	con = None
 	users = None
@@ -100,7 +103,27 @@ def read_db(dbname):
 
 def lock_user (user) :
 
+	con = None
+
+	try:	     
+		con = psycopg2.connect(database = dbname, user = 'www-data') 
+		cur = con.cursor()
+
+		cur.execute("BEGIN")
+		cur.execute("UPDATE member set (locked, active) = (true,false) where invite_code=\'"  + user[0] + "\'")
+		cur.execute("COMMIT") 
+
+
+	except psycopg2.DatabaseError, e:
+		logger.error("DB Error: %s" % e)
+		sys.exit(1)	    
+	    
+	finally:
+		if con:
+			con.close()
+
 	logger.info("Locked user: " + user[0])
+
 
 def create_user (user) :
 
@@ -112,7 +135,7 @@ def update_user (db_user, csv_user) :
 
 # main program
 csv_users = parse_file("test.csv")
-db_users = read_db("lqfb_ap")
+db_users = read_db()
 
 # db_users: [invite,user_id,identification,locked]
 # csv_users = [invite, identification, Land, Kreis, Regional, darf abstimmen]
