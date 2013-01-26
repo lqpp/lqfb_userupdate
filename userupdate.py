@@ -20,13 +20,22 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 # add formatter to ch
 ch.setFormatter(formatter)
 
+# logger file output
+f2 = logging.Formatter('%(asctime)s - %(message)s')
+errorlog = logging.FileHandler("error.log")
+errorlog.setLevel(logging.ERROR)
+errorlog.setFormatter(f2)
+logger.addHandler(errorlog)
+
+auditlog = logging.FileHandler("audit.log")
+auditlog.setLevel(logging.INFO)
+auditlog.setFormatter(f2)
+logger.addHandler(auditlog)
+
 # add ch to logger
 logger.addHandler(ch)
 
 logger.info("Logger initialised")
-
-# Old school logfile (deprecated)
-logfile = "userupdate_log_" + datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S") + '.log'
 
 # parses csv file and returns array with data
 def parse_file(filename):
@@ -76,30 +85,18 @@ def read_db(dbname):
 
 	return users
 
-def logger(text) :
-	
-	log=open(logfile, 'a')
-
-	time=datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-
-	log.write(time + ": " + text)
-
-	print text
-
-	log.close()
-	
 def lock_user (user) :
 
-	logger("Locked user: " + user[0])
+	logger.info("Locked user: " + user[0])
 
 
 def create_user (user) :
 
-	logger("Created user: " + user[0])
+	logger.info("Created user: " + user[0])
 
 def update_user (db_user, csv_user) :
 
-	logger("Updated user: " + db_user[0])
+	logger.info("Updated user: " + db_user[0])
 
 
 
