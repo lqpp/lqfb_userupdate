@@ -21,6 +21,18 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 # add formatter to ch
 ch.setFormatter(formatter)
 
+# logger file output
+f2 = logging.Formatter('%(asctime)s - %(message)s')
+errorlog = logging.FileHandler("error.log")
+errorlog.setLevel(logging.ERROR)
+errorlog.setFormatter(f2)
+logger.addHandler(errorlog)
+
+auditlog = logging.FileHandler("audit.log")
+auditlog.setLevel(logging.INFO)
+auditlog.setFormatter(f2)
+logger.addHandler(auditlog)
+
 # add ch to logger
 logger.addHandler(ch)
 
@@ -86,7 +98,6 @@ def read_db(dbname):
 
 	return users
 
-	
 def lock_user (user) :
 
 	logger.info("Locked user: " + user[0])
