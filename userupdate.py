@@ -111,21 +111,19 @@ db_users = read_db("lqfb_ap")
 # loop through the users in the DB and check if they are in the csv
 csv_index = 0
 
-for db_index in len(db_users) :
-
-	user = db_users[db_index]
+for user in db_users :
 
 	csv_start = csv_index
 
 	# find user in csv
 	while user[0] != csv_users[csv_index][0] :
-
 		csv_index += 1 
 
 
 	if user[0] == csv_users[csv_index][0] :
 		# we found the user
 		update_user(user, csv_users[csv_index])
+		csv_users.remove()
 
 	else :
 		# user is not in the csv so lock him
