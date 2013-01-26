@@ -6,6 +6,7 @@ import csv
 import datetime
 import logging
 
+
 # create logger
 logger = logging.getLogger('userupdate')
 logger.setLevel(logging.DEBUG)
@@ -35,8 +36,6 @@ logger.addHandler(auditlog)
 # add ch to logger
 logger.addHandler(ch)
 
-logger.info("Logger initialised")
-
 # parses csv file and returns array with data
 def parse_file(filename):
 
@@ -49,16 +48,30 @@ def parse_file(filename):
 		reader = csv.reader(file)
 
 		for row in reader:
-			users.append(row)
+
+			# invite, id and identification
+			user = [row[0], row[1], row[2]]
+
+			# get all units, try to split all fields
+			units = []
+
+			for i in range(3, len(row)) :
+				unit = row[i].split(',')
+
+				for u in unit :
+					units.append(u)			
+
+			user.append(units)
+			users.append(user)
 		
 	except:
+		logger.error("Error parsing csv")
 		sys.exit(1)
 
 	finally:
 		file.close()
 
 	#sort users by invite_code
-
 	return sorted(users)
 
 # reads all user_ids and invite keys from lqfb database
@@ -89,7 +102,6 @@ def lock_user (user) :
 
 	logger.info("Locked user: " + user[0])
 
-
 def create_user (user) :
 
 	logger.info("Created user: " + user[0])
@@ -97,8 +109,6 @@ def create_user (user) :
 def update_user (db_user, csv_user) :
 
 	logger.info("Updated user: " + db_user[0])
-
-
 
 # main program
 csv_users = parse_file("test.csv")
@@ -116,14 +126,12 @@ for user in db_users :
 	csv_start = csv_index
 
 	# find user in csv
-	while user[0] != csv_users[csv_index][0] :
+	while csv_index < len(csv_users) and user[0] != csv_users[csv_index][0] :
 		csv_index += 1 
-
 
 	if user[0] == csv_users[csv_index][0] :
 		# we found the user
 		update_user(user, csv_users[csv_index])
-		csv_users.remove()
 
 	else :
 		# user is not in the csv so lock him
@@ -131,11 +139,5 @@ for user in db_users :
 		lock_user(user)
 
 
-
-
-
-
-
-
-#print csv_users
-#print db_users
+#logger.info(csv_users)
+#logger.info(db_users)

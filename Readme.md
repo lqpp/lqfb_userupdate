@@ -6,6 +6,6 @@ This is mainly a script to support management of members between liquid feedback
 
 Example file for import into lf is test.csv
 
-"inviteToken",,"darfAbstimmen","Landesverband","Kreisverband","Ortsverband"
+"inviteToken","Identifikationsmerkmal","Landesverband","Kreisverband","Ortsverband","darfAbstimmen"
 
 Wobei "darfAbstimmen" ein boolscher Wert ist, also true || false
