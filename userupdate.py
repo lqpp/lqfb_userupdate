@@ -10,6 +10,7 @@ import os
 #######################################################################################
 ## Config
 dbname="lqfb_ap"
+csv_file="test.csv"
 #######################################################################################
 
 #################
@@ -17,13 +18,20 @@ dbname="lqfb_ap"
 #################
 from optparse import OptionParser
 
-usage = "usage: %prog [options]\n\nApply a whitelist of invitecodes to the LQFB database."
+usage = "usage: %prog [options] DB_NAME CSV_FILE\n\nApply a whitelist of invitecodes to the LQFB database."
 parser = OptionParser(usage)
 parser.add_option('-d', '--dry-run',  action='store_true',dest="dryrun", default=False, help='No changes to database, proposed changes written to logfile.')
 parser.add_option('-u', '--user-names',  action='store_true',dest="usernames", default=False, help='Show the display names of locked users (radomized order)')
 parser.add_option('-a', '--list-active',  action='store_true',dest="list_active", default=False, help='Shows a seperate list of all locked invite codes whose accounts are active')
 
 (options, args) = parser.parse_args()
+
+if len(args) == 2 :
+	dbname = args[0]
+	csv_file = args[1]
+	if not os.path.isfile(scv_file) :
+		Logger.error("Could not find: " + csv_file)
+		sys.exit(1)
 
 ###########
 # Logger
@@ -212,11 +220,13 @@ def update_user (db_user, csv_user) :
 
 # main program
 logger.info("Time: " + str(datetime.datetime.now()))
+logger.info("Database: " + dbname)
+logger.info("CSV_File: " + csv_file)
 
 if options.dryrun :
 	logger.info("**This is a dryrun: The changes are not applied**")
 
-csv_users = parse_file("test.csv")
+csv_users = parse_file(csv_file)
 db_users = read_db(dbname)
 
 # db_users: [invite, user_id, identification, locked, name, active ]
@@ -260,11 +270,11 @@ if options.list_active :
 
 
 if options.usernames :
-	logger.info("\n######################################################\nDisplay names of locked accounts (randomized)")
+	logger.info("\n######################################################\nDisplay names of active, locked accounts (randomized)")
 	import random
 	random.shuffle(db_users,random.random)
 	for db_user in db_users :
-		if db_user[4] != None :
+		if db_user[4] != None and db_user[5] == True:
 			logger.info(db_user[4])
 
 
