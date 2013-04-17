@@ -6,6 +6,8 @@ import csv
 import datetime
 import logging
 import os
+from mailer import Mailer
+from mailer import Message
 
 #######################################################################################
 ## Config
@@ -112,7 +114,7 @@ def read_db(dbname):
 		con = psycopg2.connect(database = dbname, user = 'www-data') 
 		cur = con.cursor()
 
-		cur.execute("SELECT invite_code,id,identification,locked,name,active FROM member ORDER BY invite_code")
+		cur.execute("SELECT invite_code,id,identification,locked,name,active,notify_email FROM member ORDER BY invite_code")
 
 		users=cur.fetchall()	    
 
@@ -138,12 +140,18 @@ def lock_users (db_users) :
 
 		logger.info("\n######################################################\nLocked invite codes: ")
 
+		sender = Mailer('127.0.0.1')
+
 		for db_user in db_users:
 			
 			#check that invitecode is nonempty
 			if db_user[0] != None :
 
 				cur.execute("UPDATE member set (locked, active) = (true,false) where invite_code=\'"  + db_user[0] + "\'")				
+				#send mail to user
+				message = Message(From="mitglieder@berlin.piratenpartei.de",To=db_user[6],Subject="Sperrung LQFB")
+				message.Body = """Hi, dein Account ist gesperrt. Haha!"""
+				sender.send(message)
 
 				logger.info(db_user[0])
 
@@ -229,7 +237,7 @@ if options.dryrun :
 csv_users = parse_file(csv_file)
 db_users = read_db(dbname)
 
-# db_users: [invite, user_id, identification, locked, name, active ]
+# db_users: [invite, user_id, identification, locked, name, active, notify_email ]
 # csv_users = [invite, identification, darf abstimmen, [units]]
 
 csv_users_match = []
