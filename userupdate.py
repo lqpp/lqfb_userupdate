@@ -147,11 +147,13 @@ def lock_users (db_users) :
 			#check that invitecode is nonempty
 			if db_user[0] != None :
 
-				cur.execute("UPDATE member set (locked, active) = (true,false) where invite_code=\'"  + db_user[0] + "\'")				
+				cur.execute("UPDATE member set (locked, active) = (true,false) where invite_code=\'"  + db_user[0] + "\'")
+
 				#send mail to user
-				message = Message(From="mitglieder@berlin.piratenpartei.de",To=db_user[6],Subject="Sperrung LQFB")
+				message = Message(From="mitglieder@berlin.piratenpartei.de",Envelope-From="devnull@lqpp.de",To=db_user[6],Subject="Sperrung LQFB")
 				message.Body = """Hi, dein Account ist gesperrt. Haha!"""
-				sender.send(message)
+				if false: #TODO: Soll gesendet werden?
+					sender.send(message)
 
 				logger.info(db_user[0])
 
